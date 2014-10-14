@@ -284,13 +284,8 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 	<td class="cc_label"><?php echo $lang['system_config_44'] ?></td>
 	<td class="cc_data">
 		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;" name="shibboleth_username_field">
-			<option value='none' <?php echo ($element_data['shibboleth_username_field'] == "none" ? "selected" : "") ?>><?php echo $lang['system_config_45'] ?></option>
-			<option value='REMOTE_USER' <?php echo ($element_data['shibboleth_username_field'] == "REMOTE_USER" ? "selected" : "") ?>>REMOTE_USER</option>
-			<option value='HTTP_REMOTE_USER' <?php echo ($element_data['shibboleth_username_field'] == "HTTP_REMOTE_USER" ? "selected" : "") ?>>HTTP_REMOTE_USER</option>
-			<option value='HTTP_AUTH_USER' <?php echo ($element_data['shibboleth_username_field'] == "HTTP_AUTH_USER" ? "selected" : "") ?>>HTTP_AUTH_USER</option>
-			<option value='HTTP_SHIB_EDUPERSON_PRINCIPAL_NAME' <?php echo ($element_data['shibboleth_username_field'] == "HTTP_SHIB_EDUPERSON_PRINCIPAL_NAME" ? "selected" : "") ?>>HTTP_SHIB_EDUPERSON_PRINCIPAL_NAME</option>
-			<option value='Shib-EduPerson-Principal-Name' <?php echo ($element_data['shibboleth_username_field'] == "Shib-EduPerson-Principal-Name" ? "selected" : "") ?>>Shib-EduPerson-Principal-Name</option>
-		</select><br/>
+			<option value='REMOTE_USER' <?php echo ($element_data['shibboleth_username_field'] == "HTTP_GLID" ? "selected" : "") ?>>HTTP_GLID</option>
+</select><br/>
 		<div class="cc_info">
 			<?php echo $lang['system_config_324'] ?>
 		</div>
