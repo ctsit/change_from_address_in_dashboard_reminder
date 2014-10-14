@@ -284,7 +284,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 	<td class="cc_label"><?php echo $lang['system_config_44'] ?></td>
 	<td class="cc_data">
 		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;" name="shibboleth_username_field">
-			<option value='REMOTE_USER' <?php echo ($element_data['shibboleth_username_field'] == "HTTP_GLID" ? "selected" : "") ?>>HTTP_GLID</option>
+			<option value='HTTP_GLID' <?php echo ($element_data['shibboleth_username_field'] == "HTTP_GLID" ? "selected" : "") ?>>HTTP_GLID</option>
 </select><br/>
 		<div class="cc_info">
 			<?php echo $lang['system_config_324'] ?>
