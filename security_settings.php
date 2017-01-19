@@ -5,6 +5,7 @@
 
 
 include 'header.php';
+if (!SUPER_USER) redirect(APP_PATH_WEBROOT);
 
 $changesSaved = false;
 
@@ -23,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		// Save this individual field value
 		$sql = "UPDATE redcap_config SET value = '".prep($this_value)."' WHERE field_name = '$this_field'";
 		$q = db_query($sql);
-		
+
 		// Log changes (if change was made)
 		if ($q && db_affected_rows() > 0) {
 			$sql_all[] = $sql;
@@ -33,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	// Log any changes in log_event table
 	if (count($changes_log) > 0) {
-		log_event(implode(";\n",$sql_all),"redcap_config","MANAGE","",implode(",\n",$changes_log),"Modify system configuration");
+		Logging::logEvent(implode(";\n",$sql_all),"redcap_config","MANAGE","",implode(",\n",$changes_log),"Modify system configuration");
 	}
 
 	$changesSaved = true;
@@ -52,7 +53,7 @@ if ($changesSaved)
 {
 	// Show user message that values were changed
 	print  "<div class='yellow' style='margin-bottom: 20px; text-align:center'>
-			<img src='".APP_PATH_IMAGES."exclamation_orange.png' class='imgfix'>
+			<img src='".APP_PATH_IMAGES."exclamation_orange.png'>
 			{$lang['control_center_19']}
 			</div>";
 }
@@ -60,11 +61,11 @@ if ($changesSaved)
 
 // TWO FACTOR VIA TWILIO: If have Twlio credentials saved, then quickly check them to ensure they are correct
 if ($element_data['two_factor_auth_twilio_enabled']) {
-	$twilio_two_factor_error = Authentication::testTwilioCrendentialsTwoFactor($element_data['two_factor_auth_twilio_account_sid'], $element_data['two_factor_auth_twilio_auth_token'], 
+	$twilio_two_factor_error = Authentication::testTwilioCrendentialsTwoFactor($element_data['two_factor_auth_twilio_account_sid'], $element_data['two_factor_auth_twilio_auth_token'],
 									$element_data['two_factor_auth_twilio_from_number'], ($_SERVER['REQUEST_METHOD'] == 'POST'));
 	if ($twilio_two_factor_error !== true) {
 		print  "<div class='red' style='margin-bottom: 20px;'>
-				<img src='".APP_PATH_IMAGES."exclamation.png' class='imgfix'>
+				<img src='".APP_PATH_IMAGES."exclamation.png'>
 				$twilio_two_factor_error
 				</div>";
 	}
@@ -73,13 +74,13 @@ if ($element_data['two_factor_auth_twilio_enabled']) {
 
 ?>
 
-<h3 style="margin-top: 0;"><?php echo RCView::img(array('src'=>'lock.png', 'class'=>'imgfix2')) . $lang['control_center_112'] ?></h3>
+<h4 style="margin-top: 0;"><?php echo RCView::img(array('src'=>'lock.png')) . $lang['control_center_112'] ?></h4>
 
 <form action='security_settings.php' enctype='multipart/form-data' target='_self' method='post' name='form' id='form'>
 <?php
 // Go ahead and manually add the CSRF token even though jQuery will automatically add it after DOM loads.
 // (This is done in case the page is very long and user submits form before the DOM has finished loading.)
-print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>";
+print "<input type='hidden' name='redcap_csrf_token' value='".System::getCsrfToken()."'>";
 ?>
 <table style="border: 1px solid #ccc; background-color: #f0f0f0;">
 
@@ -87,9 +88,9 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <!-- Auth & Login Settings -->
 <tr>
 	<td colspan="2">
-		<h3 style="font-size:14px;padding:0 10px;color:#800000;">
-			<img src="<?php print APP_PATH_IMAGES ?>icon_key.gif" class="imgfix"> <?php echo $lang['system_config_352'] ?>
-		</h3>
+		<h4 style="font-size:14px;padding:0 10px;color:#800000;">
+			<img src="<?php print APP_PATH_IMAGES ?>icon_key.gif"> <?php echo $lang['system_config_352'] ?>
+		</h4>
 	</td>
 </tr>
 <tr  id="auth_meth_global-tr" sq_id="auth_meth_global">
@@ -99,7 +100,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 		</div>
 	</td>
 	<td class="cc_data">
-		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;" name="auth_meth_global">
+		<select class="x-form-text x-form-field" style="" name="auth_meth_global">
 			<option value='none' <?php echo ($element_data['auth_meth_global'] == "none" ? "selected" : "") ?>><?php echo $lang['system_config_08'] ?></option>
 			<option value='table' <?php echo ($element_data['auth_meth_global'] == "table" ? "selected" : "") ?>><?php echo $lang['system_config_09'] ?></option>
 			<option value='ldap' <?php echo ($element_data['auth_meth_global'] == "ldap" ? "selected" : "") ?>>LDAP</option>
@@ -107,12 +108,12 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 			<option value='shibboleth' <?php echo ($element_data['auth_meth_global'] == "shibboleth" ? "selected" : "") ?>>Shibboleth <?php echo $lang['system_config_251'] ?></option>
 			<option value='rsa' <?php echo ($element_data['auth_meth_global'] == "rsa" ? "selected" : "") ?>>RSA SecurID (two-factor authentication)</option>
 			<option value='sams' <?php echo ($element_data['auth_meth_global'] == "sams" ? "selected" : "") ?>>SAMS (for CDC only)</option>
-			<option value='openid_google' <?php echo ($element_data['auth_meth_global'] == "openid_google" ? "selected" : "") ?>>Google OpenID <?php echo $lang['system_config_251'] ?></option>
+			<option value='openid_google' <?php echo ($element_data['auth_meth_global'] == "openid_google" ? "selected" : "") ?>>Google OAuth2 <?php echo $lang['system_config_251'] ?></option>
 			<option value='openid' <?php echo ($element_data['auth_meth_global'] == "openid" ? "selected" : "") ?>>OpenID <?php echo $lang['system_config_251'] ?></option>
 		</select>
 		<div class="cc_info" style="font-weight:normal;">
-			<?php echo $lang['system_config_222'] ?> 
-			<a href="https://iwg.devguard.com/trac/redcap/wiki/ChangingAuthenticationMethod" target="_blank" style="text-decoration:underline;"><?php echo $lang['system_config_223'] ?></a><?php echo $lang['system_config_224'] ?>
+			<?php echo $lang['system_config_222'] ?>
+			<a href="https://community.projectredcap.org/articles/691/authentication-how-to-change-and-set-up-authentica.html" target="_blank" style="text-decoration:underline;"><?php echo $lang['system_config_223'] ?></a><?php echo $lang['system_config_224'] ?>
 		</div>
 		<div class="cc_info">
 			<a href="<?php echo APP_PATH_WEBROOT . "ControlCenter/ldap_troubleshoot.php" ?>" style="color:#800000;text-decoration:underline;"><?php echo $lang['control_center_317'] ?></a>
@@ -124,9 +125,9 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <!-- Two Factor Auth Settings -->
 <tr>
 	<td colspan="2">
-		<h3 style="border-top:1px solid #ccc;font-size:14px;padding:10px 10px 0;color:#800000;">
-			<img src="<?php print APP_PATH_IMAGES ?>smartphone_key.png" class="imgfix"> 
-			<?php echo $lang['system_config_350'] . " " . RCView::span(array('style'=>'font-weight:normal;'), $lang['system_config_354']) ?></h3>
+		<h4 style="border-top:1px solid #ccc;font-size:14px;padding:10px 10px 0;color:#800000;">
+			<img src="<?php print APP_PATH_IMAGES ?>smartphone_key.png">
+			<?php echo $lang['system_config_350'] . " " . RCView::span(array('style'=>'font-weight:normal;'), $lang['system_config_354']) ?></h4>
 		<div style="padding:5px 10px;line-height: 14px;">
 			<?php print $lang['system_config_523'] ?>
 		</div>
@@ -140,7 +141,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 		</div>
 	</td>
 	<td class="cc_data">
-		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;" name="two_factor_auth_enabled">
+		<select class="x-form-text x-form-field" style="" name="two_factor_auth_enabled">
 			<option value='0' <?php echo ($element_data['two_factor_auth_enabled'] == "0" ? "selected" : "") ?>><?php echo $lang['global_23'] ?></option>
 			<option value='1' <?php echo ($element_data['two_factor_auth_enabled'] == "1" ? "selected" : "") ?>><?php echo $lang['system_config_27'] ?></option>
 		</select>
@@ -158,7 +159,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr>
 	<td class="cc_label">
 		<div class="hang">
-			<img src="<?php echo APP_PATH_IMAGES ?>network_ip_local.png" class="imgfix">
+			<img src="<?php echo APP_PATH_IMAGES ?>network_ip_local.png">
 			<?php echo $lang['system_config_423'] ?>
 		</div>
 		<div class="cc_info">
@@ -166,7 +167,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 		</div>
 	</td>
 	<td class="cc_data" style="padding-bottom:0;">
-		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;max-width:400px;" name="two_factor_auth_ip_check_enabled" onchange="
+		<select class="x-form-text x-form-field" style="max-width:400px;" name="two_factor_auth_ip_check_enabled" onchange="
 			if (this.value == '0') {
 				$('#div_two_factor_auth_ip_range').addClass('opacity50');
 			} else {
@@ -179,7 +180,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 			<?php echo RCView::b($lang['system_config_428']) . " " . $lang['system_config_429'] ?>
 			<textarea class='x-form-field notesbox' style='margin-top:3px;height:40px;' name='two_factor_auth_ip_range' onblur="var invalid_ips = validateIpRanges(this.value); if (invalid_ips !== true) simpleDialog('<?php print cleanHtml($lang['system_config_485']) ?><br> &bull; <b>'+invalid_ips.split(',').join('</b><br> &bull; <b>')+'</b>',null,null,null,function(){ $('textarea[name=two_factor_auth_ip_range]').focus(); });"><?php echo $element_data['two_factor_auth_ip_range'] ?></textarea><br/>
 			<div class="hang">
-				<input type="checkbox" name="two_factor_auth_ip_range_include_private" class="imgfix2" <?php if ($element_data['two_factor_auth_ip_range_include_private'] == '1') print "checked"; ?>>
+				<input type="checkbox" name="two_factor_auth_ip_range_include_private" <?php if ($element_data['two_factor_auth_ip_range_include_private'] == '1') print "checked"; ?>>
 				<?php echo $lang['system_config_427'] ?>
 				(<?php echo implode(", ", explode(",", Authentication::PRIVATE_IP_RANGES)) ?>)
 			</div>
@@ -201,7 +202,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 	<td class="cc_data" style="padding-top:20px;">
 		<input class='x-form-text x-form-field '  type='text' name='two_factor_auth_trust_period_days' value='<?php echo htmlspecialchars($element_data['two_factor_auth_trust_period_days'], ENT_QUOTES) ?>'
 			onblur="redcap_validate(this,'0','','hard','float')" size='5' />
-		<span style="color: #777;"><?php echo $lang['system_config_462'] . 
+		<span style="color: #777;"><?php echo $lang['system_config_462'] .
 			RCView::SP . RCView::SP . RCView::SP . $lang['system_config_521'] ?></span>
 	</td>
 </tr>
@@ -220,7 +221,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 	<td class="cc_data" style="padding-bottom:0;">
 		<input class='x-form-text x-form-field '  type='text' name='two_factor_auth_trust_period_days_alt' value='<?php echo htmlspecialchars($element_data['two_factor_auth_trust_period_days_alt'], ENT_QUOTES) ?>'
 			onblur="redcap_validate(this,'0','','hard','float')" size='5' />
-		<span style="color: #777;"><?php echo $lang['system_config_462'] . 
+		<span style="color: #777;"><?php echo $lang['system_config_462'] .
 			RCView::SP . RCView::SP . RCView::SP . $lang['system_config_521'] ?></span>
 		<div style="margin-top:15px;">
 			<?php echo RCView::b($lang['system_config_520']) . "<br>" . $lang['system_config_429'] ?>
@@ -247,7 +248,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 		</div>
 	</td>
 	<td class="cc_data" style="padding-top:15px;">
-		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;" name="two_factor_auth_authenticator_enabled">
+		<select class="x-form-text x-form-field" style="" name="two_factor_auth_authenticator_enabled">
 			<option value='0' <?php echo ($element_data['two_factor_auth_authenticator_enabled'] == "0" ? "selected" : "") ?>><?php echo $lang['global_23'] ?></option>
 			<option value='1' <?php echo ($element_data['two_factor_auth_authenticator_enabled'] == "1" ? "selected" : "") ?>><?php echo $lang['system_config_27'] ?></option>
 		</select>
@@ -269,7 +270,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 		</div>
 	</td>
 	<td class="cc_data" style="padding-top:15px;">
-		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;" name="two_factor_auth_email_enabled">
+		<select class="x-form-text x-form-field" style="" name="two_factor_auth_email_enabled">
 			<option value='0' <?php echo ($element_data['two_factor_auth_email_enabled'] == "0" ? "selected" : "") ?>><?php echo $lang['global_23'] ?></option>
 			<option value='1' <?php echo ($element_data['two_factor_auth_email_enabled'] == "1" ? "selected" : "") ?>><?php echo $lang['system_config_27'] ?></option>
 		</select>
@@ -294,12 +295,12 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 		</div>
 	</td>
 	<td class="cc_data" style="padding-top:15px;">
-		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;" name="two_factor_auth_twilio_enabled">
+		<select class="x-form-text x-form-field" style="" name="two_factor_auth_twilio_enabled">
 			<option value='0' <?php echo ($element_data['two_factor_auth_twilio_enabled'] == "0" ? "selected" : "") ?>><?php echo $lang['global_23'] ?></option>
 			<option value='1' <?php echo ($element_data['two_factor_auth_twilio_enabled'] == "1" ? "selected" : "") ?>><?php echo $lang['system_config_27'] ?></option>
 		</select>
 		<span style="margin-left:12px;">
-			<?php echo $lang['system_config_317'] ?> 
+			<?php echo $lang['system_config_317'] ?>
 			&nbsp;&nbsp;<button class="jqbuttonmed" onclick="testUrl('https://api.twilio.com','post','');return false;"><?php echo $lang['edit_project_138'] ?></button>
 		</span>
 		<div class="cc_info">
@@ -310,7 +311,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 		<!-- Twilio credentials -->
 		<div style="margin:15px 0 0;">
 			<div style="margin:5px 0;color:#800000;font-weight:bold;">
-				<img src="<?php echo APP_PATH_IMAGES ?>twilio.gif" class="imgfix">
+				<img src="<?php echo APP_PATH_IMAGES ?>twilio.gif">
 				<?php print $lang['survey_717'] ?>
 			</div>
 			<div style="margin:5px 0;">
@@ -341,7 +342,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 					<td></td>
 					<td style="padding-top:5px;">
 						<button class="jqbuttonmed" onclick="
-							$.post(app_path_webroot+'Authentication/two_factor_check_twilio_credentials.php',{ sid: $('input[name=two_factor_auth_twilio_account_sid]').val(), 
+							$.post(app_path_webroot+'Authentication/two_factor_check_twilio_credentials.php',{ sid: $('input[name=two_factor_auth_twilio_account_sid]').val(),
 								token: $('input[name=two_factor_auth_twilio_auth_token]').val(), phone_number: $('input[name=two_factor_auth_twilio_from_number]').val() },function(data){
 								if (data == '1') {
 									simpleDialog('<?php echo cleanHtml($lang['system_config_364']) ?>','<?php echo cleanHtml($lang['global_79']) ?>');
@@ -368,14 +369,14 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 		</div>
 	</td>
 	<td class="cc_data" style="padding-top:15px;">
-		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;" name="two_factor_auth_duo_enabled">
+		<select class="x-form-text x-form-field" style="" name="two_factor_auth_duo_enabled">
 			<option value='0' <?php echo ($element_data['two_factor_auth_duo_enabled'] == "0" ? "selected" : "") ?>><?php echo $lang['global_23'] ?></option>
 			<option value='1' <?php echo ($element_data['two_factor_auth_duo_enabled'] == "1" ? "selected" : "") ?>><?php echo $lang['system_config_27'] ?></option>
 		</select>
 		<!-- Duo credentials -->
 		<div style="margin:15px 0 0;">
 			<div style="margin:5px 0;color:green;font-weight:bold;">
-				<img src="<?php echo APP_PATH_IMAGES ?>duo.png" class="imgfix">
+				<img src="<?php echo APP_PATH_IMAGES ?>duo.png">
 				<?php print $lang['system_config_411'] ?>
 			</div>
 			<div style="margin:5px 0;">
@@ -410,11 +411,11 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <!-- Login Settings -->
 <tr>
 	<td colspan="2">
-		<h3 style="border-top:1px solid #ccc;font-size:14px;padding:10px 10px 0;color:#800000;">
-			<img src="<?php print APP_PATH_IMAGES ?>list_keys.gif" class="imgfix"> 
+		<h4 style="border-top:1px solid #ccc;font-size:14px;padding:10px 10px 0;color:#800000;">
+			<img src="<?php print APP_PATH_IMAGES ?>list_keys.gif">
 			<?php echo $lang['system_config_353'] ?>
 			<?php echo RCView::span(array('style'=>'font-weight:normal;font-size:13px;margin-left:5px;'), $lang['system_config_396']) ?>
-		</h3>
+		</h4>
 	</td>
 </tr>
 <tr  id="autologout_timer-tr" sq_id="autologout_timer">
@@ -432,7 +433,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr  id="login_logo-tr" sq_id="login_logo">
 	<td class="cc_label"><?php echo $lang['system_config_127'] ?></td>
 	<td class="cc_data">
-		<input class='x-form-text x-form-field '  type='text' name='login_logo' value='<?php echo htmlspecialchars($element_data['login_logo'], ENT_QUOTES) ?>' size="60" /><br/>
+		<input class='x-form-text x-form-field '  type='text' name='login_logo' value='<?php echo htmlspecialchars($element_data['login_logo'], ENT_QUOTES) ?>' /><br/>
 		<div class="cc_info">
 			<?php echo $lang['system_config_128'] ?>
 		</div>
@@ -477,7 +478,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr  id="login_autocomplete_disable-tr" sq_id="login_autocomplete_disable">
 	<td class="cc_label"><?php echo $lang['system_config_32'] ?></td>
 	<td class="cc_data">
-		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;" name="login_autocomplete_disable">
+		<select class="x-form-text x-form-field" style="" name="login_autocomplete_disable">
 			<option value='0' <?php echo ($element_data['login_autocomplete_disable'] == 0) ? "selected" : "" ?>><?php echo $lang['system_config_35'] ?></option>
 			<option value='1' <?php echo ($element_data['login_autocomplete_disable'] == 1) ? "selected" : "" ?>><?php echo $lang['system_config_34'] ?></option>
 		</select><br/>
@@ -492,7 +493,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr>
 	<td colspan="2">
 		<hr size=1>
-		<h3 style="font-size:14px;padding:0 10px;color:#800000;"><?php echo $lang['system_config_162'] ?></h3>
+		<h4 style="font-size:14px;padding:0 10px;color:#800000;"><?php echo $lang['system_config_162'] ?></h4>
 	</td>
 </tr>
 <!-- Password recovery custom text -->
@@ -511,10 +512,10 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 		<div id='login_custom_text-expand' style='text-align:right;'>
 			<a href='javascript:;' style='font-weight:normal;text-decoration:none;color:#999;font-family:tahoma;font-size:10px;'
 				onclick="growTextarea('password_recovery_custom_text')"><?php echo $lang['form_renderer_19'] ?></a>&nbsp;
-		</div>		
+		</div>
 		<div class="cc_info" style="font-weight:normal;">
-			<?php 
-			echo $lang['system_config_270'] . 
+			<?php
+			echo $lang['system_config_270'] .
 				 RCView::div(array('style'=>'color:#800000;'),
 					"\"".$lang['pwd_reset_25']." ".$lang['pwd_reset_26']."\""
 				 );
@@ -525,7 +526,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr>
 	<td class="cc_label"><?php echo $lang['system_config_136'] ?></td>
 	<td class="cc_data">
-		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;" name="password_history_limit">
+		<select class="x-form-text x-form-field" style="" name="password_history_limit">
 			<option value='0' <?php echo ($element_data['password_history_limit'] == 0) ? "selected" : "" ?>><?php echo $lang['design_99'] ?></option>
 			<option value='1' <?php echo ($element_data['password_history_limit'] == 1) ? "selected" : "" ?>><?php echo $lang['design_100'] ?></option>
 		</select><br/>
@@ -545,17 +546,17 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 		</div>
 </tr>
 
-<!-- Additional Google OpenID Settings -->
+<!-- Additional Google OAuth2 Settings -->
 <tr>
 	<td colspan="2">
 		<hr size=1>
-		<h3 style="font-size:14px;padding:0 10px;color:#800000;">
-			<img src="<?php print APP_PATH_IMAGES ?>google_logo.png" style="vertical-align:middle;"> 
+		<h4 style="font-size:14px;padding:0 10px;color:#800000;">
+			<img src="<?php print APP_PATH_IMAGES ?>google_logo.png" style="vertical-align:middle;">
 			<span style="vertical-align:middle;margin-left:2px;"> <?php echo $lang['system_config_381'] ?></span>
-		</h3>	
+		</h4>
 		<div class="cc_info" style="margin: 5px 10px;">
 			<b><?php echo $lang['system_config_387'] ?></b><br><?php echo $lang['system_config_384'] ?>
-			<a href="https://console.developers.google.com" target="_blank" style="text-decoration:underline;">Google Developers Console</a> 
+			<a href="https://console.developers.google.com" target="_blank" style="text-decoration:underline;">Google Developers Console</a>
 			<?php echo $lang['system_config_385'] ?> <b style="color:#800000;"><?php echo APP_PATH_WEBROOT_FULL ?></b>
 			<?php echo $lang['system_config_386'] ?>
 		</div>
@@ -564,13 +565,13 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr>
 	<td class="cc_label"><?php echo $lang['system_config_382'] ?></td>
 	<td class="cc_data">
-		<input class='x-form-text x-form-field'  type='text' name='google_oauth2_client_id' value='<?php echo htmlspecialchars($element_data['google_oauth2_client_id'], ENT_QUOTES) ?>' size="60" /><br/>
+		<input class='x-form-text x-form-field'  type='text' name='google_oauth2_client_id' value='<?php echo htmlspecialchars($element_data['google_oauth2_client_id'], ENT_QUOTES) ?>'  /><br/>
 	</td>
 </tr>
 <tr>
 	<td class="cc_label"><?php echo $lang['system_config_383'] ?></td>
 	<td class="cc_data">
-		<input class='x-form-text x-form-field'  type='text' name='google_oauth2_client_secret' value='<?php echo htmlspecialchars($element_data['google_oauth2_client_secret'], ENT_QUOTES) ?>' size="60" /><br/>
+		<input class='x-form-text x-form-field'  type='text' name='google_oauth2_client_secret' value='<?php echo htmlspecialchars($element_data['google_oauth2_client_secret'], ENT_QUOTES) ?>'  /><br/>
 	</td>
 </tr>
 
@@ -578,13 +579,13 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr>
 	<td colspan="2">
 		<hr size=1>
-		<h3 style="font-size:14px;padding:0 10px;color:#800000;"><?php echo $lang['system_config_380'] ?></h3>
+		<h4 style="font-size:14px;padding:0 10px;color:#800000;"><?php echo $lang['system_config_380'] ?></h4>
 	</td>
 </tr>
 <tr>
 	<td class="cc_label"><?php echo $lang['system_config_248'] ?></td>
 	<td class="cc_data">
-		<input class='x-form-text x-form-field'  type='text' name='openid_provider_name' value='<?php echo htmlspecialchars($element_data['openid_provider_name'], ENT_QUOTES) ?>' size="60" /><br/>
+		<input class='x-form-text x-form-field'  type='text' name='openid_provider_name' value='<?php echo htmlspecialchars($element_data['openid_provider_name'], ENT_QUOTES) ?>'  /><br/>
 		<div class="cc_info">
 			<?php echo $lang['system_config_250'] ?><br>
 			(e.g., Yahoo, MyOpenID)
@@ -594,7 +595,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr>
 	<td class="cc_label"><?php echo $lang['system_config_247'] ?></td>
 	<td class="cc_data">
-		<input class='x-form-text x-form-field'  type='text' name='openid_provider_url' value='<?php echo htmlspecialchars($element_data['openid_provider_url'], ENT_QUOTES) ?>' size="60" /><br/>
+		<input class='x-form-text x-form-field'  type='text' name='openid_provider_url' value='<?php echo htmlspecialchars($element_data['openid_provider_url'], ENT_QUOTES) ?>'  /><br/>
 		<div class="cc_info">
 			<?php echo $lang['system_config_249'] ?>
 		</div>
@@ -605,13 +606,13 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr>
 	<td colspan="2">
 		<hr size=1>
-		<h3 style="font-size:14px;padding:0 10px;color:#800000;"><?php echo $lang['system_config_158'] ?></h3>
+		<h4 style="font-size:14px;padding:0 10px;color:#800000;"><?php echo $lang['system_config_158'] ?></h4>
 	</td>
 </tr>
 <tr  id="shibboleth_username_field-tr" sq_id="shibboleth_username_field">
 	<td class="cc_label"><?php echo $lang['system_config_44'] ?></td>
 	<td class="cc_data">
-		<select class="x-form-text x-form-field" style="padding-right:0; height:22px;" name="shibboleth_username_field">
+		<select class="x-form-text x-form-field" style="" name="shibboleth_username_field">
 			<option value='none' <?php echo ($element_data['shibboleth_username_field'] == "none" ? "selected" : "") ?>><?php echo $lang['system_config_45'] ?></option>
 			<option value='HTTP_GLID' <?php echo ($element_data['shibboleth_username_field'] == "HTTP_GLID" ? "selected" : "") ?>>HTTP_GLID</option>
 			<option value='REMOTE_USER' <?php echo ($element_data['shibboleth_username_field'] == "REMOTE_USER" ? "selected" : "") ?>>REMOTE_USER</option>
@@ -628,7 +629,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr  id="shibboleth_logout-tr" sq_id="shibboleth_logout">
 	<td class="cc_label"><?php echo $lang['system_config_46'] ?></td>
 	<td class="cc_data">
-		<input class='x-form-text x-form-field '  type='text' name='shibboleth_logout' value='<?php echo htmlspecialchars($element_data['shibboleth_logout'], ENT_QUOTES) ?>' size="60" /><br/>
+		<input class='x-form-text x-form-field '  type='text' name='shibboleth_logout' value='<?php echo htmlspecialchars($element_data['shibboleth_logout'], ENT_QUOTES) ?>'  /><br/>
 		<div class="cc_info">
 			<?php echo $lang['system_config_47'] ?>
 		</div>
@@ -639,13 +640,13 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr>
 	<td colspan="2">
 		<hr size=1>
-		<h3 style="font-size:14px;padding:0 10px;color:#800000;"><?php echo $lang['system_config_303'] ?></h3>
+		<h4 style="font-size:14px;padding:0 10px;color:#800000;"><?php echo $lang['system_config_303'] ?></h4>
 	</td>
 </tr>
 <tr>
 	<td class="cc_label"><?php echo $lang['system_config_304'] ?></td>
 	<td class="cc_data">
-		<input class='x-form-text x-form-field '  type='text' name='sams_logout' value='<?php echo htmlspecialchars($element_data['sams_logout'], ENT_QUOTES) ?>' size="60" /><br/>
+		<input class='x-form-text x-form-field '  type='text' name='sams_logout' value='<?php echo htmlspecialchars($element_data['sams_logout'], ENT_QUOTES) ?>'  /><br/>
 		<div class="cc_info">
 			<?php echo $lang['system_config_47'] ?>
 		</div>
@@ -656,7 +657,7 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <tr>
 	<td colspan="2">
 		<hr size=1>
-		<h3 style="font-size:14px;padding:0 10px;color:#800000;"><?php echo $lang['system_config_543'] ?></h3>
+		<h4 style="font-size:14px;padding:0 10px;color:#800000;"><?php echo $lang['system_config_543'] ?></h4>
 	</td>
 </tr>
 <tr>
@@ -687,14 +688,14 @@ print "<input type='hidden' name='redcap_csrf_token' value='".getCsrfToken()."'>
 <div style="text-align: center;"><input type='submit' name='' value='Save Changes' /></div><br/>
 </form>
 
-<?php 
+<?php
 // Dialog for Twilio setup explanation
 print 	RCView::div(array('id'=>'twilio2FAsetupExplain', 'class'=>'simpleDialog', 'title'=>$lang['survey_717']),
 			$lang['system_config_377'] . " " .
 			RCView::a(array('href'=>'https://www.twilio.com', 'target'=>'_blank', 'style'=>'font-size:13px;text-decoration:underline;'),
 				"www.twilio.com"
 			) . $lang['period'] . " " .
-			$lang['system_config_378'] . RCView::br() . RCView::br() . 
+			$lang['system_config_378'] . RCView::br() . RCView::br() .
 			$lang['system_config_379']
 		);
 // Dialog for Duo setup explanation
@@ -703,7 +704,7 @@ print 	RCView::div(array('id'=>'duo2FAsetupExplain', 'class'=>'simpleDialog', 't
 			RCView::a(array('href'=>'https://admin.duosecurity.com', 'target'=>'_blank', 'style'=>'font-size:13px;text-decoration:underline;'),
 				"https://admin.duosecurity.com"
 			) . $lang['period'] . " " .
-			$lang['system_config_418'] . RCView::br() . RCView::br() . 
+			$lang['system_config_418'] . RCView::br() . RCView::br() .
 			$lang['system_config_419']
 		);
 
