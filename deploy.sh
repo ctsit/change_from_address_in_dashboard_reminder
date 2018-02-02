@@ -1,8 +1,8 @@
 #!/bin/bash
-# deployment script for the redcap_security_settings GLID patch
+# deployment script for the change_from_address patch for the ReminderUserAccessDashboardEmail cron job
 # Clone the repo that has this file via
 #
-#   git clone git@ctsit-forge.ctsi.ufl.edu:redcap_security_settings.git
+#   git clone git@ctsit-forge.ctsi.ufl.edu:change_from_address_in_ReminderUserAccessDashboardEmail.git
 #
 # Call this script with two parameters:
 #
@@ -18,5 +18,5 @@ export REDCAP_VERSION=$2
 # determine the directory where this script resides
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-cd $REDCAP_ROOT/redcap_v$REDCAP_VERSION/ControlCenter/
-patch -p1 < $DIR/security_settings.php.patch
+cd $REDCAP_ROOT/redcap_v$REDCAP_VERSION/Classes/
+patch -p1 < $DIR/patch.patch
