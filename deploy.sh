@@ -2,7 +2,7 @@
 # deployment script for the change_from_address patch for the ReminderUserAccessDashboardEmail cron job
 # Clone the repo that has this file via
 #
-#   git clone git@ctsit-forge.ctsi.ufl.edu:change_from_address_in_ReminderUserAccessDashboardEmail.git
+#   git clone git@github.com:ctsit/change_from_address_in_dashboard_reminder.git
 #
 # Call this script with two parameters:
 #
