@@ -35,4 +35,4 @@ fi
 rm $PATCH_VERSIONS
 
 cd $REDCAP_ROOT/redcap_v$REDCAP_VERSION/Classes/
-patch -p1 --dry-run < $DIR/${REDCAP_PATCH_VERSION}.patch
+patch -p1 < $DIR/${REDCAP_PATCH_VERSION}.patch
