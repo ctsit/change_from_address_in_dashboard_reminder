@@ -18,8 +18,14 @@ export REDCAP_VERSION=$2
 # determine the directory where this script resides
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Enumerate available patch files
 PATCH_VERSIONS=$(mktemp)
+CWD=`pwd`
+cd $DIR
 $(ls *.patch | grep -v "sql" | sed "s/\.patch//;" > $PATCH_VERSIONS)
+cd $CWD
+
+# Get version string of the best patch file
 if [[ $(cat $PATCH_VERSIONS | grep "$REDCAP_VERSION") ]]; then
     REDCAP_PATCH_VERSION=$REDCAP_VERSION
 else
