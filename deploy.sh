@@ -15,8 +15,9 @@ set -e
 export REDCAP_ROOT=$1
 export REDCAP_VERSION=$2
 
-# determine the directory where this script resides
+# determine the directory where this script resides and cd to it
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $DIR
 
 PATCH_VERSIONS=$(mktemp)
 $(ls *.patch | grep -v "sql" | sed "s/\.patch//;" > $PATCH_VERSIONS)
