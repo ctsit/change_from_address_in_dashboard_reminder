@@ -7,7 +7,7 @@ index e375b6b..40aaa52 100644
  			// Initialize email
  			$email = new Message();
 -			$email->setFrom($project_contact_email);
-+			$email->setFrom('ctsit-redcap-reply@ufl.edu');
++			$email->setFrom('ctsit-redcap-reply@ad.ufl.edu');
  			$email->setSubject("[REDCap] {$lang['cron_08']}");
  			$emailContents = "{$lang['cron_02']}<br><br>{$lang['cron_12']}<br><br>
  							 <a href=\"".APP_PATH_WEBROOT_FULL."index.php?action=user_access_dashboard\">".$lang['cron_21']."</a>";
