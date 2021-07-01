@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.4.1] - 2021-07-01
+### Changed
+- Fix the from address (Philip Chase)
+
+
 ## [0.4.0] - 2021-06-03
 ### Changed
 - Update the from address (Philip Chase)
