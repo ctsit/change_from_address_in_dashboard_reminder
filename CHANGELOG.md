@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.5.0] - 2021-11-05
+### Changed
+- Add v11.2.4.patch, updated location (Kyle Chesney)
+
+
 ## [0.4.1] - 2021-07-01
 ### Changed
 - Fix the from address (Philip Chase)
