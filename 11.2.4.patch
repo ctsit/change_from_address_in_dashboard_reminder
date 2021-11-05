@@ -1,0 +1,13 @@
+diff --git a/Jobs.php b/Jobs.php
+index 5ad592c..6a24e90 100644
+--- a/Jobs.php
++++ b/Jobs.php
+@@ -485,7 +485,7 @@ class Jobs
+ 			## EMAILS TO SEND
+ 			// Initialize email
+ 			$email = new Message();
+-			$email->setFrom($project_contact_email);
++			$email->setFrom('ctsit-redcap-reply@ad.ufl.edu');
+ 			$email->setFromName($GLOBALS['project_contact_name']);
+ 			$email->setSubject("[REDCap] {$lang['cron_08']}");
+ 			$emailContents = "{$lang['cron_02']}<br><br>{$lang['cron_12']}<br><br>
