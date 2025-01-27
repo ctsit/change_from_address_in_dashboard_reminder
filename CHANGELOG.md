@@ -1,8 +1,5 @@
-# Change Log for change_from_address_in_dashboard_reminder
-
-All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
-
+# change_from_address_in_dashboard_reminder 0.6.0 (released 2025-01-27)
+- Add 15.0.0.patch (@pbchase)
 
 ## [0.5.0] - 2021-11-05
 ### Changed
